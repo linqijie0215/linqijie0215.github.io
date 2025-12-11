@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="x5-fullscreen" content="true">
+    <meta name="x5-page-mode" content="app">
+    <title>心型文本框</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+            overflow-x: hidden;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            touch-action: pan-y;
+            position: relative;
+        }
+        
+        html {
+            height: -webkit-fill-available;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .title {
+            text-align: center;
+            color: white;
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        .heart-container {
+            position: relative;
+            width: 100%;
+            flex: 1;
+            min-height: 400px;
+        }
+
+        .textbox {
+            position: absolute;
+            width: 150px;
+            padding: 10px;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            color: #333;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards;
+            -webkit-appearance: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .textbox:focus {
+            outline: none;
+            border-color: #ff6b9d;
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(255, 107, 157, 0.4);
+            z-index: 10;
+        }
+
+        .textbox::placeholder {
+            color: #999;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .button-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            width: 100%;
+            padding: 0 10px;
+        }
+
+        button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff4757 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-appearance: none;
+            touch-action: manipulation;
+            min-width: 140px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+                padding-bottom: max(10px, env(safe-area-inset-bottom));
+            }
+            
+            .container {
+                height: auto;
+                min-height: 90vh;
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+            }
+            
+            .heart-container {
+                min-height: 350px;
+                height: 60vh;
+            }
+            
+            .textbox {
+                width: 100px;
+                font-size: 12px;
+                padding: 8px 6px;
+            }
+            
+            .title {
+                font-size: 22px;
+                margin-bottom: 10px;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 14px;
+                min-width: 120px;
+            }
+            
+            .button-container {
+                gap: 10px;
+                margin-top: 15px;
+                padding-bottom: env(safe-area-inset-bottom, 10px);
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .textbox {
+                width: 85px;
+                font-size: 11px;
+                padding: 6px 4px;
+            }
+            
+            .title {
+                font-size: 18px;
+            }
+            
+            button {
+                padding: 8px 16px;
+                font-size: 13px;
+                min-width: 100px;
+            }
+        }
+        
+        /* 安卓特定优化 */
+        @media (max-width: 600px) and (orientation: portrait) {
+            .heart-container {
+                height: calc(100vh - 200px);
+                min-height: 300px;
+                max-height: 500px;
+            }
+        }
+        
+        @media (max-width: 600px) and (orientation: landscape) {
+            .container {
+                min-height: auto;
+            }
+            
+            .heart-container {
+                height: 50vh;
+                min-height: 250px;
+            }
+            
+            .title {
+                font-size: 18px;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">💕 心型文本框 💕</h1>
+        <div class="heart-container" id="heartContainer"></div>
+        <div class="button-container">
+            <button onclick="printTextboxes()">打印所有文本</button>
+            <button onclick="clearAll()">清空所有</button>
+        </div>
+    </div>
+
+    <script>
+        // 生成心型坐标点
+        function generateHeartPoints(numPoints) {
+            const points = [];
+            const container = document.getElementById('heartContainer');
+            const containerWidth = container.offsetWidth;
+            const containerHeight = container.offsetHeight;
+            
+            const centerX = containerWidth / 2;
+            const centerY = containerHeight / 2;
+            
+            // 根据容器大小动态调整缩放比例
+            const scale = Math.min(containerWidth, containerHeight) / 35;
+            
+            for (let i = 0; i < numPoints; i++) {
+                const t = (i / numPoints) * 2 * Math.PI;
+                
+                // 心型参数方程
+                const x = scale * 16 * Math.pow(Math.sin(t), 3);
+                const y = -scale * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+                
+                points.push({
+                    x: centerX + x,
+                    y: centerY + y
+                });
+            }
+            
+            return points;
+        }
+
+        // 创建文本框
+        function createTextboxes() {
+            const container = document.getElementById('heartContainer');
+            const points = generateHeartPoints(20); // 创建20个文本框
+            
+            points.forEach((point, index) => {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'textbox';
+                input.placeholder = `${index + 1}`;
+                
+                // 动态计算偏移量
+                const boxWidth = window.innerWidth <= 400 ? 85 : (window.innerWidth <= 600 ? 100 : 150);
+                const boxHeight = 40;
+                
+                input.style.left = `${point.x - boxWidth / 2}px`;
+                input.style.top = `${point.y - boxHeight / 2}px`;
+                input.style.animationDelay = `${index * 0.05}s`;
+                
+                container.appendChild(input);
+            });
+        }
+
+        // 打印所有文本框内容
+        function printTextboxes() {
+            const textboxes = document.querySelectorAll('.textbox');
+            let output = '=== 文本框内容 ===\n\n';
+            let hasContent = false;
+            
+            textboxes.forEach((input, index) => {
+                if (input.value.trim()) {
+                    output += `文本框 ${index + 1}: ${input.value}\n`;
+                    hasContent = true;
+                }
+            });
+            
+            if (!hasContent) {
+                alert('所有文本框都是空的，请先输入一些内容！');
+            } else {
+                // 在控制台打印
+                console.log(output);
+                
+                // 弹出提示
+                alert(output);
+                
+                // 如果需要，也可以在页面上显示
+                const printDiv = document.createElement('div');
+                
+                // 创建遮罩层
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.5);
+                    z-index: 999;
+                    -webkit-backdrop-filter: blur(5px);
+                    backdrop-filter: blur(5px);
+                `;
+                
+                // 检测设备类型
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                const isAndroid = /Android/.test(navigator.userAgent);
+                const isMobile = window.innerWidth <= 600;
+                const screenHeight = window.innerHeight || window.screen.availHeight;
+                
+                // 计算安全的最大高度（安卓和iOS都适用）
+                const safeMaxHeight = isMobile ? Math.min(screenHeight * 0.75, 500) : screenHeight * 0.8;
+                
+                printDiv.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    padding: ${isMobile ? '20px 15px' : '30px'};
+                    border-radius: 15px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                    max-width: ${isMobile ? '90vw' : '80%'};
+                    max-height: ${safeMaxHeight}px;
+                    width: ${isMobile ? 'calc(100vw - 40px)' : 'auto'};
+                    min-width: ${isMobile ? '280px' : 'auto'};
+                    overflow-y: auto;
+                    z-index: 1000;
+                    -webkit-overflow-scrolling: touch;
+                    overscroll-behavior: contain;
+                    ${isIOS ? 'padding-bottom: max(20px, env(safe-area-inset-bottom));' : ''}
+                    ${isAndroid ? 'padding-bottom: 25px;' : ''}
+                `;
+                
+                const closeButtonStyle = `
+                    margin-top: 15px;
+                    padding: ${isMobile ? '12px 24px' : '12px 30px'};
+                    background: linear-gradient(135deg, #ff6b9d 0%, #ff4757 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 25px;
+                    font-size: ${isMobile ? '15px' : '16px'};
+                    cursor: pointer;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+                    width: ${isMobile ? '100%' : 'auto'};
+                    min-height: 44px;
+                    -webkit-tap-highlight-color: transparent;
+                    -webkit-appearance: none;
+                    touch-action: manipulation;
+                    font-weight: 500;
+                `;
+                
+                printDiv.innerHTML = `
+                    <h3 style="margin-bottom: 15px; color: #ff6b9d; font-size: ${isMobile ? '18px' : '20px'}; font-weight: 600;">📝 文本框内容</h3>
+                    <pre style="
+                        white-space: pre-wrap;
+                        color: #333;
+                        font-size: ${isMobile ? '14px' : '14px'};
+                        line-height: 1.8;
+                        word-break: break-word;
+                        overflow-wrap: break-word;
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+                        max-height: ${isMobile ? Math.min(screenHeight * 0.5, 300) : 400}px;
+                        overflow-y: auto;
+                        padding-right: 5px;
+                    ">${output}</pre>
+                    <button onclick="closeModal()" style="${closeButtonStyle}">关闭</button>
+                `;
+                
+                // 添加关闭函数
+                window.closeModal = function() {
+                    printDiv.remove();
+                    overlay.remove();
+                    delete window.closeModal;
+                };
+                
+                // 点击遮罩层关闭
+                overlay.onclick = function() {
+                    window.closeModal();
+                };
+                
+                document.body.appendChild(overlay);
+                document.body.appendChild(printDiv);
+                
+                // 防止弹窗滚动时触发背景滚动（iOS和安卓优化）
+                let startY = 0;
+                printDiv.addEventListener('touchstart', function(e) {
+                    startY = e.touches[0].pageY;
+                }, { passive: true });
+                
+                printDiv.addEventListener('touchmove', function(e) {
+                    e.stopPropagation();
+                    
+                    // 防止弹窗内容在顶部或底部时继续滚动触发背景滚动
+                    const scrollTop = printDiv.scrollTop;
+                    const scrollHeight = printDiv.scrollHeight;
+                    const clientHeight = printDiv.clientHeight;
+                    const deltaY = e.touches[0].pageY - startY;
+                    
+                    if (scrollTop === 0 && deltaY > 0) {
+                        e.preventDefault();
+                    } else if (scrollTop + clientHeight >= scrollHeight && deltaY < 0) {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+                
+                // 禁止body滚动
+                const bodyScrollPosition = window.pageYOffset;
+                document.body.style.overflow = 'hidden';
+                document.body.style.position = 'fixed';
+                document.body.style.top = `-${bodyScrollPosition}px`;
+                document.body.style.width = '100%';
+                
+                // 关闭时恢复滚动
+                const originalCloseModal = window.closeModal;
+                window.closeModal = function() {
+                    document.body.style.removeProperty('overflow');
+                    document.body.style.removeProperty('position');
+                    document.body.style.removeProperty('top');
+                    document.body.style.removeProperty('width');
+                    window.scrollTo(0, bodyScrollPosition);
+                    originalCloseModal();
+                };
+            }
+        }
+
+        // 清空所有文本框
+        function clearAll() {
+            if (confirm('确定要清空所有文本框吗？！')) {
+                const textboxes = document.querySelectorAll('.textbox');
+                textboxes.forEach(input => {
+                    input.value = '';
+                });
+            }
+        }
+
+        // 页面加载时创建文本框
+        window.onload = function() {
+            createTextboxes();
+        };
+        
+        // 监听窗口大小变化，重新绘制文本框
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                const container = document.getElementById('heartContainer');
+                const inputs = container.querySelectorAll('.textbox');
+                const values = Array.from(inputs).map(input => input.value);
+                
+                container.innerHTML = '';
+                createTextboxes();
+                
+                const newInputs = container.querySelectorAll('.textbox');
+                newInputs.forEach((input, index) => {
+                    input.value = values[index] || '';
+                });
+            }, 300);
+        });
+        
+        // 防止页面缩放（微信中）
+        document.addEventListener('touchstart', function(event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+        
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(event) {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>
