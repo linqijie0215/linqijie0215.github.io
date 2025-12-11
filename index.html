@@ -309,42 +309,42 @@
             }
         }
 
-        // 自动烟花秀 - 多层循环，不同频率
+        // 自动烟花秀 - 降低频率版本
         function autoFireworks() {
-            // 主烟花循环 - 每500ms一次
+            // 主烟花循环 - 每1500ms一次（降低频率）
             setInterval(() => {
                 const x = Math.random() * window.innerWidth;
                 const y = 100 + Math.random() * (window.innerHeight * 0.5);
                 createFirework(x, y);
-            }, 500);
+            }, 1500);
             
-            // 副烟花循环1 - 每800ms一次
+            // 副烟花循环1 - 每2500ms一次（降低频率）
             setInterval(() => {
                 const x = Math.random() * window.innerWidth;
                 const y = 150 + Math.random() * (window.innerHeight * 0.4);
                 createFirework(x, y);
-            }, 800);
+            }, 2500);
             
-            // 副烟花循环2 - 每1200ms一次
+            // 副烟花循环2 - 每3500ms一次（降低频率）
             setInterval(() => {
                 const x = Math.random() * window.innerWidth;
                 const y = 80 + Math.random() * (window.innerHeight * 0.6);
                 createFirework(x, y);
-            }, 1200);
+            }, 3500);
             
-            // 连续爆发效果 - 每3秒爆发一次
+            // 连续爆发效果 - 每8秒爆发一次，减少数量（降低频率）
             setInterval(() => {
                 const baseX = window.innerWidth / 2;
                 const spread = window.innerWidth / 3;
                 
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 3; i++) {
                     setTimeout(() => {
                         const x = baseX + (Math.random() - 0.5) * spread;
                         const y = 100 + Math.random() * 200;
                         createFirework(x, y);
-                    }, i * 150);
+                    }, i * 250);
                 }
-            }, 3000);
+            }, 8000);
         }
         
         // 点击事件 - 可选，如果想保留点击功能
