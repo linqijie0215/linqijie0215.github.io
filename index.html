@@ -274,26 +274,80 @@
                 
                 // 如果需要，也可以在页面上显示
                 const printDiv = document.createElement('div');
+                
+                // 创建遮罩层
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.5);
+                    z-index: 999;
+                    -webkit-backdrop-filter: blur(5px);
+                    backdrop-filter: blur(5px);
+                `;
+                
+                // 检测是否为iOS设备
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                const isMobile = window.innerWidth <= 600;
+                
                 printDiv.style.cssText = `
                     position: fixed;
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
                     background: white;
-                    padding: 30px;
+                    padding: ${isMobile ? '20px' : '30px'};
                     border-radius: 15px;
                     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                    max-width: 80%;
-                    max-height: 80%;
+                    max-width: ${isMobile ? '90%' : '80%'};
+                    max-height: ${isMobile ? '70vh' : '80%'};
+                    width: ${isMobile ? 'calc(100vw - 40px)' : 'auto'};
                     overflow-y: auto;
                     z-index: 1000;
+                    -webkit-overflow-scrolling: touch;
+                    ${isIOS ? 'padding-bottom: env(safe-area-inset-bottom, 20px);' : ''}
                 `;
+                
                 printDiv.innerHTML = `
-                    <h3 style="margin-bottom: 15px; color: #ff6b9d;">📝 文本框内容</h3>
-                    <pre style="white-space: pre-wrap; color: #333;">${output}</pre>
-                    <button onclick="this.parentElement.remove()" style="margin-top: 15px;">关闭</button>
+                    <h3 style="margin-bottom: 15px; color: #ff6b9d; font-size: ${isMobile ? '18px' : '20px'};">📝 文本框内容</h3>
+                    <pre style="white-space: pre-wrap; color: #333; font-size: ${isMobile ? '13px' : '14px'}; line-height: 1.6; word-break: break-word;">${output}</pre>
+                    <button onclick="closeModal()" style="
+                        margin-top: 15px;
+                        padding: ${isMobile ? '10px 24px' : '12px 30px'};
+                        background: linear-gradient(135deg, #ff6b9d 0%, #ff4757 100%);
+                        color: white;
+                        border: none;
+                        border-radius: 25px;
+                        font-size: ${isMobile ? '14px' : '16px'};
+                        cursor: pointer;
+                        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+                        width: ${isMobile ? '100%' : 'auto'};
+                        -webkit-tap-highlight-color: transparent;
+                    ">关闭</button>
                 `;
+                
+                // 添加关闭函数
+                window.closeModal = function() {
+                    printDiv.remove();
+                    overlay.remove();
+                    delete window.closeModal;
+                };
+                
+                // 点击遮罩层关闭
+                overlay.onclick = function() {
+                    window.closeModal();
+                };
+                
+                document.body.appendChild(overlay);
                 document.body.appendChild(printDiv);
+                
+                // 防止弹窗滚动时触发背景滚动（iOS优化）
+                printDiv.addEventListener('touchmove', function(e) {
+                    e.stopPropagation();
+                }, { passive: true });
             }
         }
 
