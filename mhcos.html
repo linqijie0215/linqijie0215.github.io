@@ -2,20 +2,27 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
     <title>MH角色互动系统</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
         }
 
         body {
-            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            font-family: 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
         }
 
         .container {
@@ -29,6 +36,18 @@
             margin-bottom: 30px;
             font-size: 2.5em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 移动端适配 */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+            }
         }
 
         .characters-grid {
@@ -68,6 +87,14 @@
             object-fit: cover;
             display: block;
             transition: opacity 0.3s ease;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        @media screen and (max-width: 768px) {
+            .character-image {
+                height: 350px;
+            }
         }
 
         .switch-btn {
@@ -85,15 +112,21 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
             z-index: 10;
-        }
-
-        .switch-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         .switch-btn:active {
             transform: scale(0.95);
+        }
+
+        @media screen and (max-width: 768px) {
+            .switch-btn {
+                padding: 10px 20px;
+                font-size: 0.9em;
+                bottom: 15px;
+                right: 15px;
+            }
         }
 
         .character-info {
@@ -151,6 +184,15 @@
             min-height: 150px;
             max-height: 200px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media screen and (max-width: 768px) {
+            .chat-area {
+                padding: 15px;
+                min-height: 120px;
+                max-height: 180px;
+            }
         }
 
         .message {
@@ -175,6 +217,8 @@
             border-radius: 15px;
             display: inline-block;
             max-width: 90%;
+            word-wrap: break-word;
+            word-break: break-word;
         }
 
         .message.character .message-bubble {
@@ -297,10 +341,12 @@
             cursor: pointer;
             font-size: 1em;
             transition: transform 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
-        .close-item-btn:hover {
-            transform: scale(1.1);
+        .close-item-btn:active {
+            transform: scale(0.95);
         }
 
         /* 道具收藏栏 */
@@ -310,6 +356,13 @@
             padding: 20px;
             margin-top: 30px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        @media screen and (max-width: 768px) {
+            .items-collection {
+                padding: 15px;
+                margin-top: 20px;
+            }
         }
 
         .items-collection-title {
@@ -339,6 +392,16 @@
             background: #f9f9f9;
             position: relative;
             transition: all 0.3s ease;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        @media screen and (max-width: 768px) {
+            .item-slot {
+                width: 65px;
+                height: 65px;
+                font-size: 2em;
+            }
         }
 
         .item-slot.unlocked {
