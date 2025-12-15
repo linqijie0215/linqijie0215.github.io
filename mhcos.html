@@ -738,7 +738,14 @@
         }
 
         // 切换图片
-        function switchImage() {
+        function switchImage(event) {
+            // 阻止事件冒泡和默认行为
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+            }
+            
             currentImageIndex = (currentImageIndex + 1) % characterData.images.length;
             const imageData = characterData.images[currentImageIndex];
             const imageElement = document.getElementById('characterImage');
@@ -753,6 +760,8 @@
                 // 淡入效果
                 imageElement.style.opacity = '1';
             }, 150);
+            
+            return false;
         }
 
         // 更新好感度
@@ -788,8 +797,9 @@
 
         // 处理角色点击
         function handleCharacterClick(event) {
-            // 如果点击的是切换按钮，不处理
-            if (event.target.id === 'switchBtn' || event.target.closest('#switchBtn')) {
+            // 如果点击的是切换按钮或其子元素，不处理
+            const switchBtn = document.getElementById('switchBtn');
+            if (event.target === switchBtn || switchBtn.contains(event.target)) {
                 return;
             }
             
@@ -880,13 +890,27 @@
             // 角色卡片点击事件
             const card = document.getElementById('characterCard');
             card.addEventListener('click', handleCharacterClick);
+            // iOS兼容性：同时添加触摸事件
+            card.addEventListener('touchend', (event) => {
+                const switchBtn = document.getElementById('switchBtn');
+                if (event.target !== switchBtn && !switchBtn.contains(event.target)) {
+                    handleCharacterClick(event);
+                }
+            }, { passive: false });
             
             // 切换按钮点击事件
             const switchBtn = document.getElementById('switchBtn');
+            // 移除之前可能存在的事件监听
+            switchBtn.onclick = null;
+            
+            // 同时绑定click和touchend事件以兼容iOS
             switchBtn.addEventListener('click', (event) => {
-                event.stopPropagation(); // 阻止事件冒泡
-                switchImage();
-            });
+                switchImage(event);
+            }, false);
+            
+            switchBtn.addEventListener('touchend', (event) => {
+                switchImage(event);
+            }, { passive: false });
         });
     </script>
 </body>
