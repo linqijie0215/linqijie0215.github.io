@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MH角色互动系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .characters-grid {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .character-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .character-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .character-card:active {
+            transform: translateY(-5px) scale(0.98);
+        }
+
+        .image-container {
+            position: relative;
+        }
+
+        .character-image {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            display: block;
+            transition: opacity 0.3s ease;
+        }
+
+        .switch-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .switch-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .switch-btn:active {
+            transform: scale(0.95);
+        }
+
+        .character-info {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .character-name {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .current-image-indicator {
+            font-size: 0.8em;
+            color: #667eea;
+            background: #e8eaf6;
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+
+        .favorability {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .favorability-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .favorability-value {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* 聊天消息区域 */
+        .chat-area {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 15px;
+            min-height: 150px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin-bottom: 12px;
+            animation: messageSlide 0.3s ease;
+        }
+
+        @keyframes messageSlide {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .message-bubble {
+            background: #f0f0f0;
+            padding: 10px 15px;
+            border-radius: 15px;
+            display: inline-block;
+            max-width: 90%;
+        }
+
+        .message.character .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message-sender {
+            font-size: 0.8em;
+            color: #999;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .message.character .message-sender {
+            color: #667eea;
+        }
+
+        .favorability-notification {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 8px;
+            border-radius: 10px;
+            animation: pulse 0.5s ease;
+            font-size: 0.9em;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .favorability-icon {
+            font-size: 1.2em;
+            margin-right: 5px;
+        }
+
+        /* 道具掉落效果 */
+        .item-drop {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: itemAppear 0.5s ease;
+            text-align: center;
+        }
+
+        @keyframes itemAppear {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .item-drop-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+            animation: itemFloat 2s ease-in-out infinite;
+        }
+
+        @keyframes itemFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .item-drop-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .item-drop-desc {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        .item-drop-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            display: none;
+        }
+
+        .item-drop-overlay.show {
+            display: block;
+        }
+
+        .close-item-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.3s ease;
+        }
+
+        .close-item-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* 道具收藏栏 */
+        .items-collection {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .items-collection-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .items-grid {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .item-slot {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            background: #f9f9f9;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .item-slot.unlocked {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f093fb20 0%, #f5576c20 100%);
+            animation: itemGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes itemGlow {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+            }
+        }
+
+        .item-slot.locked::after {
+            content: '🔒';
+            font-size: 0.5em;
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+        }
+
+        .item-name {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.3em;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        /* 点击特效 */
+        .click-effect {
+            position: absolute;
+            pointer-events: none;
+            font-size: 2em;
+            font-weight: bold;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 100;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px) scale(1.5);
+            }
+        }
+
+        /* 好感度飘窗 */
+        .favor-float {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4);
+            z-index: 500;
+            animation: favorPopup 2s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes favorPopup {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px) scale(0.8);
+            }
+            15% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0) scale(1.1);
+            }
+            85% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px) scale(0.9);
+            }
+        }
+
+        .favor-float-icon {
+            display: inline-block;
+            animation: heartBeat 0.5s ease-in-out;
+            margin-right: 8px;
+        }
+
+        @keyframes heartBeat {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.3);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div class="characters-grid">
+            <div class="character-card" id="characterCard">
+                <div class="image-container">
+                    <img src="mh/mh.jpg" alt="角色" class="character-image" id="characterImage">
+                    <button class="switch-btn" id="switchBtn">🔄 切换形象</button>
+                </div>
+                <div class="character-info">
+                    <div class="character-name">
+                        蒙皓
+                        <span class="current-image-indicator" id="imageIndicator">形象 1</span>
+                    </div>
+                    <div class="favorability">
+                        <span class="favorability-label">好感度:</span>
+                        <span class="favorability-value" id="favorability">0</span>
+                    </div>
+                </div>
+                <div class="chat-area" id="chatArea">
+                    <div style="text-align: center; color: #999; padding: 20px;">点击角色开始互动~</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 道具收藏栏 -->
+        <div class="items-collection">
+            <div class="items-collection-title">💝 珍藏回忆</div>
+            <div class="items-grid">
+                <div class="item-slot locked" id="item-zaoni" data-favor="50">
+                    <span class="item-name">枣泥糕</span>
+                </div>
+                <div class="item-slot locked" id="item-hunjin" data-favor="100">
+                    <span class="item-name">婚书</span>
+                </div>
+                <div class="item-slot locked" id="item-flower" data-favor="150">
+                    <span class="item-name">白芷花</span>
+                </div>
+                <div class="item-slot locked" id="item-ring" data-favor="200">
+                    <span class="item-name">玉佩</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 道具掉落弹窗 -->
+    <div class="item-drop-overlay" id="itemOverlay"></div>
+    <div class="item-drop" id="itemDrop" style="display: none;">
+        <div class="item-drop-icon" id="itemIcon">🎁</div>
+        <div class="item-drop-title" id="itemTitle">获得道具！</div>
+        <div class="item-drop-desc" id="itemDesc">恭喜你解锁了新的回忆</div>
+        <button class="close-item-btn" onclick="closeItemDrop()">收下</button>
+    </div>
+
+    <script>
+        // 角色数据
+        const characterData = {
+            name: '蒙皓',
+            playerName: '小芷',
+            images: [
+                { src: 'mh/mh.jpg', label: '春日' },
+                { src: 'mh/mh2.jpg', label: '隐居' }
+            ],
+            messages: [
+                // 好感度 0-50：初识与日常
+                { text: '小芷，春风如你，抚平万物。', minFavor: 0 },
+                { text: '山中看着盛开的花，我想啊春天又到了，小芷是不是也能回来？', minFavor: 5 },
+                { text: '蒙皓哥哥还等着把收集的花朵都赠与小芷呢。', minFavor: 10 },
+                { text: '小芷，你还不知道吧，我会每日收集一些花朵放于床头。', minFavor: 15 },
+                { text: '每日在床前放一束花，闻着花香入眠，好似小芷陪伴在我身边。', minFavor: 20 },
+                { text: '繁花为媒，思念为寄。', minFavor: 25 },
+                { text: '我想采一束野花放在枕边，闻着幽幽的花香，做一个有你的好梦。', minFavor: 30 },
+                
+                // 好感度 50-100：回忆与温情
+                { text: '小芷替我的那碗汤药中怕是加了不少糖吧，居然喝不到一丝苦味。', minFavor: 35 },
+                { text: '小芷，你做的枣泥糕真甜，好想再品尝一次。', minFavor: 40 },
+                { text: '我喜欢把枣泥糕分你一半，喜欢陪你登高采花。', minFavor: 45 },
+                { text: '喜欢看你闻着花香入睡时恬静的笑脸。', minFavor: 50 },
+                { text: '小芷，蒙皓的身体从来没好过，只有小芷在身边看着我，才能逐渐好起来。', minFavor: 55 },
+                { text: '好想小芷能陪着我。', minFavor: 60 },
+                { text: '你说等你在战场立功得了赏赐，会分一半给我，不至于让我饿死。', minFavor: 65 },
+                { text: '那日我忽然发现，我们的骏马，早就私定终身了。', minFavor: 70 },
+                { text: '或许乌云将军和枣泥，本就该是幸福的一对。', minFavor: 75 },
+                
+                // 好感度 100-150：情感觉醒
+                { text: '小芷，今天我在采花路上，突然看到了一片雏菊花海。', minFavor: 80 },
+                { text: '那一片白印入眼帘，我爱白色，像独立于这欲念纷飞世界的那抹纯洁。', minFavor: 85 },
+                { text: '小芷，是你来看我了吗？', minFavor: 90 },
+                { text: '我可还有资格说出我想你这句话呢。', minFavor: 95 },
+                { text: '小芷，自你离去后，我就独爱小雏菊。', minFavor: 100 },
+                { text: '因为雏菊啊，意味着藏在心底的爱恋，是纯洁和天真。', minFavor: 105 },
+                { text: '小芷，是不是很像你啊。', minFavor: 110 },
+                { text: '你说你不知道什么是爱，只知道每次摘花的时候，想要把最特别的那一朵送给我。', minFavor: 115 },
+                { text: '可是在我心里，你才是最特别的一朵花。', minFavor: 120 },
+                
+                // 好感度 150-200：懊悔与反思
+                { text: '曾经的你总说不知对我是何情感，只想把最特别的花给我。', minFavor: 125 },
+                { text: '我口口声声说着把你当妹妹，可我却从没想过让你开心。', minFavor: 130 },
+                { text: '是我赠于鲜花，是我分了你一半的枣泥糕，是我先在你的心中留下的烙印。', minFavor: 135 },
+                { text: '小芷，自从成婚之后你就再也没有露出笑脸。', minFavor: 140 },
+                { text: '这一生你为我付出了太多，而我却因为少年时的情愫始终不能全心全意地爱你。', minFavor: 145 },
+                { text: '我在心里对你说了一万次对不起，可又有什么用呢？', minFavor: 150 },
+                { text: '做个好梦，小芷。这样恶毒的人间，配不上这样好的你。', minFavor: 155 },
+                
+                // 好感度 200-250：深情告白
+                { text: '小芷，我只想对你说一声，我爱你。', minFavor: 160 },
+                { text: '我这一生能娶你为妻，是多大的幸运。', minFavor: 165 },
+                { text: '你说你爱我这件事，从来都是你一个人的事。', minFavor: 170 },
+                { text: '那倘若我也爱你呢？', minFavor: 175 },
+                { text: '我多么想把全部的爱都给你，闻着花香，和你一起做一个长相厮守的梦。', minFavor: 180 },
+                { text: '青鸟已经远去，如今野花开满山谷，我只等你一人回家。', minFavor: 185 },
+                
+                // 好感度 250+：诗意誓言
+                { text: '瑟瑟风寒中，孑孑皎白立。味苦皆厌之，暗香独藏心。', minFavor: 190 },
+                { text: '恍然命无常，逝去始为惜。繁花为嫁衣，萤火为点缀。', minFavor: 195 },
+                { text: '吾妻名白芷，当与世人知。', minFavor: 200 },
+                { text: '今生簪花，来世漂亮。', minFavor: 210 },
+                { text: '来生我愿在你枕边放一束野花，去叫醒我心底最好的姑娘。', minFavor: 220 }
+            ]
+        };
+
+        // 当前图片索引
+        let currentImageIndex = 0;
+
+        // 道具配置
+        const items = {
+            'item-zaoni': {
+                name: '枣泥糕',
+                icon: '🥮',
+                favor: 50,
+                desc: '小芷亲手做的枣泥糕，甜而不腻，是蒙皓最爱的味道'
+            },
+            'item-hunjin': {
+                name: '婚书',
+                icon: '💒',
+                favor: 100,
+                desc: '两人的婚书，见证了那段青梅竹马的情缘'
+            },
+            'item-flower': {
+                name: '白芷花',
+                icon: '🌸',
+                favor: 150,
+                desc: '那片白色花海中的白芷花，如你的名字，纯洁而芬芳'
+            },
+            'item-ring': {
+                name: '玉佩',
+                icon: '💎',
+                favor: 200,
+                desc: '蒙皓送给小芷的定情信物，承载着今生来世的誓言'
+            }
+        };
+
+        // 从 localStorage 加载好感度
+        function loadFavorability() {
+            const saved = localStorage.getItem('favorability');
+            return saved ? parseInt(saved) : 0;
+        }
+
+        // 保存好感度到 localStorage
+        function saveFavorability(value) {
+            localStorage.setItem('favorability', value);
+        }
+
+        // 初始化好感度显示
+        function initFavorability() {
+            const favorability = loadFavorability();
+            document.getElementById('favorability').textContent = favorability;
+            // 检查并解锁已达到条件的道具
+            checkAndUnlockItems(favorability, false);
+        }
+
+        // 检查并解锁道具
+        function checkAndUnlockItems(currentFavor, showAnimation = true, oldFavor = 0) {
+            Object.keys(items).forEach(itemId => {
+                const item = items[itemId];
+                const itemSlot = document.getElementById(itemId);
+                const isUnlocked = localStorage.getItem(itemId) === 'unlocked';
+                
+                // 如果已解锁，直接显示
+                if (isUnlocked || currentFavor >= item.favor) {
+                    if (!isUnlocked) {
+                        // 新解锁
+                        localStorage.setItem(itemId, 'unlocked');
+                        itemSlot.classList.remove('locked');
+                        itemSlot.classList.add('unlocked');
+                        itemSlot.textContent = item.icon;
+                        
+                        // 只在好感度增长时显示动画
+                        if (showAnimation && oldFavor < item.favor && currentFavor >= item.favor) {
+                            showItemDrop(item);
+                        }
+                    } else {
+                        // 已经解锁过的
+                        itemSlot.classList.remove('locked');
+                        itemSlot.classList.add('unlocked');
+                        itemSlot.textContent = item.icon;
+                    }
+                }
+            });
+        }
+
+        // 显示道具掉落
+        function showItemDrop(item) {
+            const itemDrop = document.getElementById('itemDrop');
+            const itemOverlay = document.getElementById('itemOverlay');
+            const itemIcon = document.getElementById('itemIcon');
+            const itemTitle = document.getElementById('itemTitle');
+            const itemDesc = document.getElementById('itemDesc');
+            
+            itemIcon.textContent = item.icon;
+            itemTitle.textContent = `获得：${item.name}！`;
+            itemDesc.textContent = item.desc;
+            
+            itemOverlay.classList.add('show');
+            itemDrop.style.display = 'block';
+        }
+
+        // 关闭道具掉落窗口
+        function closeItemDrop() {
+            const itemDrop = document.getElementById('itemDrop');
+            const itemOverlay = document.getElementById('itemOverlay');
+            
+            itemOverlay.classList.remove('show');
+            itemDrop.style.display = 'none';
+        }
+
+        // 切换图片
+        function switchImage() {
+            currentImageIndex = (currentImageIndex + 1) % characterData.images.length;
+            const imageData = characterData.images[currentImageIndex];
+            const imageElement = document.getElementById('characterImage');
+            const indicator = document.getElementById('imageIndicator');
+            
+            // 淡出效果
+            imageElement.style.opacity = '0';
+            
+            setTimeout(() => {
+                imageElement.src = imageData.src;
+                indicator.textContent = imageData.label;
+                // 淡入效果
+                imageElement.style.opacity = '1';
+            }, 150);
+        }
+
+        // 更新好感度
+        function updateFavorability() {
+            const increase = Math.floor(Math.random() * 11); // 0-10随机
+            const element = document.getElementById('favorability');
+            let currentValue = parseInt(element.textContent);
+            const oldValue = currentValue;
+            currentValue += increase;
+            element.textContent = currentValue;
+            saveFavorability(currentValue);
+            
+            // 检查是否解锁新道具
+            checkAndUnlockItems(currentValue, true, oldValue);
+            
+            return { total: currentValue, increase: increase };
+        }
+
+        // 获取随机聊天消息（根据好感度）
+        function getRandomMessage() {
+            const currentFavor = parseInt(document.getElementById('favorability').textContent);
+            // 筛选出可用的消息（好感度达到要求的）
+            const availableMessages = characterData.messages.filter(msg => currentFavor >= msg.minFavor);
+            
+            if (availableMessages.length === 0) {
+                return characterData.messages[0].text; // 返回第一条消息
+            }
+            
+            // 从可用消息中随机选择
+            const randomMsg = availableMessages[Math.floor(Math.random() * availableMessages.length)];
+            return randomMsg.text;
+        }
+
+        // 处理角色点击
+        function handleCharacterClick(event) {
+            // 如果点击的是切换按钮，不处理
+            if (event.target.id === 'switchBtn' || event.target.closest('#switchBtn')) {
+                return;
+            }
+            
+            const chatArea = document.getElementById('chatArea');
+            const card = document.getElementById('characterCard');
+            
+            // 添加角色消息
+            const message = getRandomMessage();
+            addMessage(message, 'character', characterData.name);
+            
+            // 更新好感度（不显示飘窗）
+            const result = updateFavorability();
+            
+            // 添加点击特效
+            showClickEffect(card, result.increase);
+        }
+
+        // 添加消息
+        function addMessage(text, type, sender) {
+            const chatArea = document.getElementById('chatArea');
+            
+            // 如果是第一次点击，清空提示文字
+            if (chatArea.querySelector('div[style]')) {
+                chatArea.innerHTML = '';
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            // 替换消息中的占位符
+            const displayText = text.replace(/小芷/g, characterData.playerName);
+            
+            messageDiv.innerHTML = `
+                <div class="message-sender">${sender}</div>
+                <div class="message-bubble">${displayText}</div>
+            `;
+            
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            // 限制消息数量，保留最新的10条
+            const messages = chatArea.querySelectorAll('.message');
+            if (messages.length > 10) {
+                messages[0].remove();
+            }
+        }
+
+        // 显示好感度飘窗
+        function showFavorFloating(increase, totalFavorability) {
+            const floatDiv = document.createElement('div');
+            floatDiv.className = 'favor-float';
+            floatDiv.innerHTML = `
+                <span class="favor-float-icon">❤️</span>
+                好感度 +${increase}
+            `;
+            
+            document.body.appendChild(floatDiv);
+            
+            // 2秒后移除
+            setTimeout(() => {
+                floatDiv.remove();
+            }, 2000);
+        }
+
+        // 显示点击特效
+        function showClickEffect(card, increase) {
+            const effect = document.createElement('div');
+            effect.className = 'click-effect';
+            effect.textContent = `+${increase}`;
+            effect.style.color = increase > 5 ? '#f5576c' : '#f093fb';
+            effect.style.left = '50%';
+            effect.style.top = '50%';
+            effect.style.transform = 'translate(-50%, -50%)';
+            
+            card.style.position = 'relative';
+            card.appendChild(effect);
+            
+            setTimeout(() => {
+                effect.remove();
+            }, 1000);
+        }
+
+        // 事件监听
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化好感度
+            initFavorability();
+            
+            // 角色卡片点击事件
+            const card = document.getElementById('characterCard');
+            card.addEventListener('click', handleCharacterClick);
+            
+            // 切换按钮点击事件
+            const switchBtn = document.getElementById('switchBtn');
+            switchBtn.addEventListener('click', (event) => {
+                event.stopPropagation(); // 阻止事件冒泡
+                switchImage();
+            });
+        });
+    </script>
+</body>
+</html>
