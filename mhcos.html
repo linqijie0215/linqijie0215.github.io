@@ -623,12 +623,30 @@
                 { text: '我多么想把全部的爱都给你，闻着花香，和你一起做一个长相厮守的梦。', minFavor: 180 },
                 { text: '青鸟已经远去，如今野花开满山谷，我只等你一人回家。', minFavor: 185 },
                 
-                // 好感度 250+：诗意誓言
-                { text: '瑟瑟风寒中，孑孑皎白立。味苦皆厌之，暗香独藏心。', minFavor: 190 },
-                { text: '恍然命无常，逝去始为惜。繁花为嫁衣，萤火为点缀。', minFavor: 195 },
-                { text: '吾妻名白芷，当与世人知。', minFavor: 200 },
-                { text: '今生簪花，来世漂亮。', minFavor: 210 },
-                { text: '来生我愿在你枕边放一束野花，去叫醒我心底最好的姑娘。', minFavor: 220 }
+                // 好感度 250+：深情告白
+                { text: '小芷，今日的花开得很好。我看了一会儿，忽然想起——还好你在。', minFavor: 190 },
+                { text: '我总会下意识去数你回来用了多久。后来才发现，你已经不用再向我证明什么了。', minFavor: 192 },
+                { text: '你靠近的时候，我会停下手里的事。因为我知道，曾经有一段时间，我是等不到你的。', minFavor: 195 },
+                { text: '小芷，我现在很少再做噩梦。偶尔醒来，摸到你在，心才会慢慢放下来。', minFavor: 197 },
+                { text: '你笑的时候，我总会多看一眼。并不是不习惯，是怕哪一天，我又只能靠回忆。', minFavor: 198 },
+                { text: '我已经学会把话说出来了。因为我知道，沉默真的会失去你。', minFavor: 199 },
+                
+                // 好感度 300+：诗意誓言
+                { text: '瑟瑟风寒中，孑孑皎白立。味苦皆厌之，暗香独藏心。', minFavor: 200 },
+                { text: '恍然命无常，逝去始为惜。繁花为嫁衣，萤火为点缀。', minFavor: 205 },
+                { text: '吾妻名白芷，当与世人知。', minFavor: 210 },
+                { text: '今生簪花，来世漂亮。', minFavor: 220 },
+                { text: '来生我愿在你枕边放一束野花，去叫醒我心底最好的姑娘。', minFavor: 230 },
+                
+                // 更高好感度的对话
+                { text: '从前我不敢牵你的手。如今每一次牵着，都在心里说一句"幸好"。', minFavor: 240 },
+                { text: '你问我为何总是这么温柔。小芷，是因为我再也经不起，看你转身的样子。', minFavor: 245 },
+                { text: '我没有忘记那段日子。只是现在，我选择好好抱着你。', minFavor: 250 },
+                
+                // 更高好感度的对话
+                { text: '夜里你翻身的时候，我会醒。并不是睡得浅，是怕你醒来找不到我。', minFavor: 255 },
+                { text: '若你哪天又要离开一阵子，记得告诉我。我已经不再阻拦，只是会等。', minFavor: 260 },
+                { text: '小芷，能这样等你，已经比从前，幸福太多。', minFavor: 265 }
             ]
         };
 
@@ -911,7 +929,24 @@
             switchBtn.addEventListener('touchend', (event) => {
                 switchImage(event);
             }, { passive: false });
+            
+            // 为已解锁的道具添加点击浏览功能
+            initItemViewing();
         });
+        
+        // 初始化道具查看功能
+        function initItemViewing() {
+            Object.keys(items).forEach(itemId => {
+                const itemSlot = document.getElementById(itemId);
+                itemSlot.addEventListener('click', () => {
+                    const isUnlocked = localStorage.getItem(itemId) === 'unlocked';
+                    if (isUnlocked) {
+                        const item = items[itemId];
+                        showItemDrop(item);
+                    }
+                });
+            });
+        }
     </script>
 </body>
 </html>
